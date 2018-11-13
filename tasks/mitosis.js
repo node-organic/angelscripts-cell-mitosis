@@ -26,13 +26,12 @@ module.exports = function (angel) {
       domain: mitosis.target.domain,
       mitosis: mitosis
     }
-    writeJSON(remoteDistPath, mitosisJSON)
+    let mitosisJSONPath = `~/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}`
+    writeJSON(mitosisJSONPath, mitosisJSON)
   })
   angel.on('cell mitosis :mitosisName', async function (angel) {
     const full_repo_path = await findSkeletonRoot()
     const loadCellInfo = require(path.join(full_repo_path, 'cells/node_modules/lib/load-cell-info'))
-    const loadRootDNA = require(path.join(full_repo_path, 'cells/node_modules/lib/load-root-dna'))
-    let rootDNA = await loadRootDNA()
     let list = new List({
       name: 'versionChange',
       message: 'version change?',
