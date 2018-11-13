@@ -26,7 +26,7 @@ module.exports = function (angel) {
       domain: mitosis.target.domain,
       mitosis: mitosis
     }
-    let mitosisJSONPath = `~/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}`
+    let mitosisJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}`
     writeJSON(mitosisJSONPath, mitosisJSON)
   })
   angel.on('cell mitosis :mitosisName', async function (angel) {
