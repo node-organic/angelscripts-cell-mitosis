@@ -26,7 +26,7 @@ module.exports = function (angel) {
       domain: mitosis.target.domain,
       mitosis: mitosis
     }
-    let mitosisJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}`
+    let mitosisJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}.json`
     writeJSON(mitosisJSONPath, mitosisJSON)
   })
   angel.on('cell mitosis :mitosisName', async function (angel) {
@@ -89,6 +89,9 @@ const doPromise = function (angel, cmdInput) {
 }
 const writeJSON = function (filepath, jsonContent) {
   return new Promise((resolve, reject) => {
-    fs.writeFile(filepath, JSON.stringify(jsonContent))
+    fs.writeFile(filepath, JSON.stringify(jsonContent), (err) => {
+      if (err) return reject(err)
+      resolve()
+    })
   })
 }
