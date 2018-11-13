@@ -11,6 +11,7 @@
   "author": "Boris Filipov",
   "license": "MIT",
   "dependencies": {
+    "angelabilities-exec": "^1.0.0",
     "find-up": "^3.0.0",
     "prompt-list": "^3.2.0"
   },
