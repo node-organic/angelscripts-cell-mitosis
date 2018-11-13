@@ -69,7 +69,7 @@ module.exports = function (angel) {
         `npm i --production`,
         `cd ${remoteDistPath}/${cellInfo.cwd}`,
         'npm i --production',
-        `npx angel mitosis ${angel.cmdData.mitosisName} store`
+        `npx angel cell mitosis ${angel.cmdData.mitosisName} store`
       ].join(' && ')}'`
     ].join(' && ')
     if (process.env.DRY || angel.dry) {
