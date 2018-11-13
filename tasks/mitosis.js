@@ -1,4 +1,4 @@
-const findSkeletonRoot = require('./lib/skeleton-root-path')
+const findSkeletonRoot = require('../lib/skeleton-root-path')
 const path = require('path')
 const List = require('prompt-list')
 const os = require('os')
