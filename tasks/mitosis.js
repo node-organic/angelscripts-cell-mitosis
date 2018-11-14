@@ -3,6 +3,7 @@ const path = require('path')
 const List = require('prompt-list')
 const os = require('os')
 const fs = require('fs')
+const semver = require('semver')
 
 module.exports = function (angel) {
   angel.on('cell mitosis :mitosisName store', async function (angel) {
@@ -38,14 +39,19 @@ module.exports = function (angel) {
       choices: [ 'major', 'minor', 'patch', 'prerelease', 'none' ],
       default: 'none'
     })
+    let packagejson_path = path.join(process.cwd(), 'package.json')
+    let packagejson = require(packagejson_path)
     let versionChange = await list.run()
     if (versionChange !== 'none') {
+      let newVersion = semver.inc(packagejson.version, versionChange)
+      packagejson.version = newVersion
+      await writePrettyJSON(packagejson_path, packagejson)
       await angel.exec([
-        `npm version ${versionChange}`,
+        `git commit -am '${packagejson.name}-${newVersion}'`,
+        `git tag ${packagejson.name}-${newVersion}`,
         `git push --tags`
       ].join(' && '))
     }
-    let packagejson = require(path.join(process.cwd(), 'package.json'))
     let cellName = packagejson.name
     let cellInfo = await loadCellInfo(cellName)
     let mitosis = cellInfo.dna.mitosis[angel.cmdData.mitosisName]
@@ -90,6 +96,14 @@ const doPromise = function (angel, cmdInput) {
 const writeJSON = function (filepath, jsonContent) {
   return new Promise((resolve, reject) => {
     fs.writeFile(filepath, JSON.stringify(jsonContent), (err) => {
+      if (err) return reject(err)
+      resolve()
+    })
+  })
+}
+const writePrettyJSON = function (filepath, jsonDiff) {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(filepath, JSON.stringify(jsonDiff, null, 2), (err) => {
       if (err) return reject(err)
       resolve()
     })
