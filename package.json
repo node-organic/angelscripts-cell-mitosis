@@ -1,9 +1,14 @@
 {
   "name": "angelscripts-cell-mitosis",
-  "version": "1.0.0",
+  "version": "0.0.0",
+  "description": "Angel scripts for deploying organic cells on `vps` infrastructure.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "release-patch": "npm version patch",
+    "release-minor": "npm version minor",
+    "release-major": "npm version major",
+    "postversion": "npm publish && git push --tags && git push origin master"
   },
   "peerDependencies": {
     "organic-angel": "0.3.x"
@@ -36,6 +41,5 @@
   "bugs": {
     "url": "https://github.com/node-organic/angelscripts-cell-mitosis/issues"
   },
-  "homepage": "https://github.com/node-organic/angelscripts-cell-mitosis#readme",
-  "description": ""
+  "homepage": "https://github.com/node-organic/angelscripts-cell-mitosis#readme"
 }

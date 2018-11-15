@@ -30,18 +30,26 @@ module.exports = function (angel) {
     let mitosisJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}.json`
     writeJSON(mitosisJSONPath, mitosisJSON)
   })
-  angel.on('cell mitosis :mitosisName', async function (angel) {
+  angel.on('cell mitosis :mitosisName :versionChange?', async function (angel) {
     const full_repo_path = await findSkeletonRoot()
     const loadCellInfo = require(path.join(full_repo_path, 'cells/node_modules/lib/load-cell-info'))
-    let list = new List({
-      name: 'versionChange',
-      message: 'version change?',
-      choices: [ 'major', 'minor', 'patch', 'prerelease', 'none' ],
-      default: 'none'
-    })
     let packagejson_path = path.join(process.cwd(), 'package.json')
     let packagejson = require(packagejson_path)
-    let versionChange = await list.run()
+    let cellName = packagejson.name
+    let cellInfo = await loadCellInfo(cellName)
+    let mitosis = cellInfo.dna.mitosis[angel.cmdData.mitosisName]
+    let versionChange
+    if (!mitosis.versionChange && !angel.cmdData.versionChange) {
+      let list = new List({
+        name: 'versionChange',
+        message: 'version change?',
+        choices: [ 'major', 'minor', 'patch', 'prerelease', 'none' ],
+        default: 'none'
+      })
+      versionChange = await list.run()
+    } else {
+      versionChange = angel.cmdData.versionChange || mitosis.versionChange
+    }
     if (versionChange !== 'none') {
       let newVersion = semver.inc(packagejson.version, versionChange)
       packagejson.version = newVersion
@@ -52,9 +60,6 @@ module.exports = function (angel) {
         `git push --tags`
       ].join(' && '))
     }
-    let cellName = packagejson.name
-    let cellInfo = await loadCellInfo(cellName)
-    let mitosis = cellInfo.dna.mitosis[angel.cmdData.mitosisName]
     let packPath = path.join(os.tmpdir(), `${cellName}-${cellInfo.version}.tar.gz`)
     let cellMode = mitosis.mode
     let remoteDistPath = `~/deployments/cells/${cellName}/${packagejson.version}-${cellMode}`
@@ -68,15 +73,17 @@ module.exports = function (angel) {
       `ssh node@${mitosis.target.ip} '${[
         `cd ${remoteDistPath}`,
         'tar -zxf deployment.tar.gz',
-        '. ~/.nvm/nvm.sh',
-        `nvm install ${packagejson.engines.node}`,
-        `nvm use ${packagejson.engines.node}`,
-        `cd ${remoteDistPath}`,
-        `npm i --production`,
-        `cd ${remoteDistPath}/${cellInfo.cwd}`,
-        'npm i --production',
+        mitosis.zygote ? '' : [
+          '. ~/.nvm/nvm.sh',
+          `nvm install ${packagejson.engines.node}`,
+          `nvm use ${packagejson.engines.node}`,
+          `cd ${remoteDistPath}`,
+          `npm i --production`,
+          `cd ${remoteDistPath}/${cellInfo.cwd}`,
+          'npm i --production',
+        ].join(' && '),
         `npx angel cell mitosis ${angel.cmdData.mitosisName} store`
-      ].join(' && ')}'`
+      ].filter(v => v).join(' && ')}'`
     ].join(' && ')
     if (process.env.DRY || angel.dry) {
       console.info(deployCmd)
