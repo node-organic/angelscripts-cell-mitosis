@@ -31,7 +31,7 @@ module.exports = function (angel) {
         path.join(cellInfo.cwd, 'dist/')
       ]
     }
-    let excludes = await buildExcludes(full_repo_path, srcPaths)
+    let excludes = await buildExcludes(full_repo_path, srcPaths.concat('')) // srcPaths.concat includes full_repo_path/.gitignore
     srcPaths.push('package.json')
     srcPaths.push(path.join(cellInfo.cwd, 'package.json'))
     let bundleCmd = [
@@ -51,7 +51,12 @@ const buildExcludes = async function (full_repo_path, srcPaths) {
   let excludes = []
   await forEach(srcPaths, async (dir) => {
     let lines = await readLines(path.join(full_repo_path, dir, '.gitignore'))
-    lines = lines.filter(v => v).map(v => `--exclude='${path.join(dir, v)}*'`)
+    lines = lines
+      .filter(v => v) // only non-empty lines
+      .filter(v => !v.trim().startsWith('#')) // only non comments
+      .map(v => path.extname(v) === '' ? v + '*' : v) // append '*' to dirs
+      .map(v => v.startsWith('/') ? '.' + v : v) // prepend '.' infront of dirs
+      .map(v => `--exclude='${path.join(dir, v)}'`)
     excludes = excludes.concat(lines)
   })
   excludes.push(`--exclude='/.git'`)
