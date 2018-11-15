@@ -18,7 +18,7 @@ npm install angelscripts-cell-mitosis --save-dev
 
 ## Usage
 
-### angel cell mitosis :mitosisName
+### angel cell mitosis :mitosisName :versionChange
 
 Start a cell mitosis. This essentially deploys the current working cell to a remote outlined by the mitosis structure in cell's dna:
 
@@ -31,7 +31,8 @@ Start a cell mitosis. This essentially deploys the current working cell to a rem
   },
   versionChange: String,
   mode: String,
-  zygote: Boolean
+  zygote: Boolean,
+  storeCmd: "npx angel cell mitosis ${mitosisName} store"
 }
 ```
 

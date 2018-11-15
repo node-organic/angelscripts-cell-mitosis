@@ -1,6 +1,5 @@
 const findSkeletonRoot = require('../lib/skeleton-root-path')
 const path = require('path')
-const List = require('prompt-list')
 const os = require('os')
 const fs = require('fs')
 const semver = require('semver')
@@ -30,7 +29,7 @@ module.exports = function (angel) {
     let mitosisJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}.json`
     writeJSON(mitosisJSONPath, mitosisJSON)
   })
-  angel.on('cell mitosis :mitosisName :versionChange?', async function (angel) {
+  angel.on('cell mitosis :mitosisName :versionChange', async function (angel) {
     const full_repo_path = await findSkeletonRoot()
     const loadCellInfo = require(path.join(full_repo_path, 'cells/node_modules/lib/load-cell-info'))
     let packagejson_path = path.join(process.cwd(), 'package.json')
@@ -38,19 +37,8 @@ module.exports = function (angel) {
     let cellName = packagejson.name
     let cellInfo = await loadCellInfo(cellName)
     let mitosis = cellInfo.dna.mitosis[angel.cmdData.mitosisName]
-    let versionChange
-    if (!mitosis.versionChange && !angel.cmdData.versionChange) {
-      let list = new List({
-        name: 'versionChange',
-        message: 'version change?',
-        choices: [ 'major', 'minor', 'patch', 'prerelease', 'none' ],
-        default: 'none'
-      })
-      versionChange = await list.run()
-    } else {
-      versionChange = angel.cmdData.versionChange || mitosis.versionChange
-    }
-    if (versionChange !== 'none') {
+    let versionChange = angel.cmdData.versionChange || mitosis.versionChange
+    if (versionChange !== 'current') {
       let newVersion = semver.inc(packagejson.version, versionChange)
       packagejson.version = newVersion
       await writePrettyJSON(packagejson_path, packagejson)
@@ -82,7 +70,7 @@ module.exports = function (angel) {
           `cd ${remoteDistPath}/${cellInfo.cwd}`,
           'npm i --production',
         ].join(' && '),
-        `npx angel cell mitosis ${angel.cmdData.mitosisName} store`
+        !mitosis.storeCmd ? `npx angel cell mitosis ${angel.cmdData.mitosisName} store` : mitosis.storeCmd
       ].filter(v => v).join(' && ')}'`
     ].join(' && ')
     if (process.env.DRY || angel.dry) {
