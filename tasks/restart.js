@@ -9,7 +9,7 @@ module.exports = function (angel) {
     let cellInfo = await loadCellInfo(packagejson.name)
     let mitosis = cellInfo.dna.mitosis[angel.cmdData.mitosisName]
     let statusCmd = [
-      `ssh root@${mitosis.target.ip} "systemctl restart '${cellInfo.name}*'"`
+      `ssh root@${mitosis.target.ip} "systemctl restart '${packagejson.name}*'"`
     ].filter(v => v).join(' && ')
     if (process.env.DRY || angel.dry) {
       console.info(statusCmd)

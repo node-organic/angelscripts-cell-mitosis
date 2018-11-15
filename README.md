@@ -16,6 +16,55 @@ npm install angelscripts-cell-mitosis --save-dev
 
 `angelscripts-cell-mitosis` requires `Ubuntu` version 14.04+ or Debian version 7+
 
+## Usage
+
+### angel cell mitosis :mitosisName
+
+Start a cell mitosis. This essentially deploys the current working cell to a remote outlined by the mitosis structure in cell's dna:
+
+```javascript
+{
+  name: String,
+  target: {
+    domain: String,
+    ip: String
+  },
+  versionChange: String,
+  mode: String,
+  zygote: Boolean
+}
+```
+
+1. packs current working cell by reading its name from `packagejson.name`
+2. uploads to mitosis' target `mitosis.target.ip` at `/home/node/deployments/cells/{name}-{version}-{mitosis.mode}.json`
+3. writes to `/home/node/deployments/{name}-{version}-{mitosis.mode}.json`
+
+  ```javascript
+{
+  name: packagejson.name,
+  cwd: process.cwd(),
+  version: packagejson.version,
+  nodeVersion: packagejson.engines.node,
+  endpoint: '127.0.0.1:' + port,
+  port: port,
+  mountpoint: 'cell-mountpoints.{cellName}',
+  domain: mitosis.target.domain,
+  mitosis: mitosis
+}
+  ```
+
+### angel cell apoptosis :mitosisName
+
+Deletes a mitosis from remote. This essentially deletes `/home/node/deployments/{name}-{version}-{mitosis.mode}.json` on the remote.
+
+### angel cell restart :mitosisName
+
+Restarts all cells by their name by given mitosisName. :warning: this restarts all cell versions.
+
+### angel cell status :mitosisName
+
+Lists all active cell versions by given mitosisName.
+
 ## Testing
 
 Doesn't have a test section. Why ?

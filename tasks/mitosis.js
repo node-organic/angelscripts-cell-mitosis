@@ -62,7 +62,7 @@ module.exports = function (angel) {
     }
     let packPath = path.join(os.tmpdir(), `${cellName}-${cellInfo.version}.tar.gz`)
     let cellMode = mitosis.mode
-    let remoteDistPath = `~/deployments/cells/${cellName}/${packagejson.version}-${cellMode}`
+    let remoteDistPath = `~/deployments/cells/${cellName}-${packagejson.version}-${cellMode}`
     await doPromise(angel, `cell pack ${angel.cmdData.mitosisName} ${packPath}`)
     let deployCmd = [
       `cd ${full_repo_path}`,
