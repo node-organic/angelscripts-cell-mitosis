@@ -25,10 +25,15 @@ module.exports = function (angel) {
     let cellMode = mitosis.mode
     if (packagejson.scripts.build) {
       await angel.exec(`CELL_MODE=${cellMode} npm run build`)
-      srcPaths = [ path.join(cellInfo.cwd, 'dist/') ]
+      srcPaths = [
+        'cells/node_modules/',
+        'dna/',
+        path.join(cellInfo.cwd, 'dist/')
+      ]
     }
     let excludes = await buildExcludes(full_repo_path, srcPaths)
     srcPaths.push('package.json')
+    srcPaths.push(path.join(cellInfo.cwd, 'package.json'))
     let bundleCmd = [
       `cd ${full_repo_path}`,
       `mkdir -p ${path.dirname(packPath)}`,

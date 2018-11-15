@@ -26,6 +26,9 @@ module.exports = function (angel) {
       domain: mitosis.target.domain,
       mitosis: mitosis
     }
+    if (mitosis.zygote) {
+      mitosisJSON.endpoint = process.cwd() + '/dist'
+    }
     let mitosisJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}.json`
     writeJSON(mitosisJSONPath, mitosisJSON)
   })
@@ -61,17 +64,15 @@ module.exports = function (angel) {
       `ssh node@${mitosis.target.ip} '${[
         `cd ${remoteDistPath}`,
         'tar -zxf deployment.tar.gz',
-        mitosis.zygote ? '' : [
-          '. ~/.nvm/nvm.sh',
-          `nvm install ${packagejson.engines.node}`,
-          `nvm use ${packagejson.engines.node}`,
-          `cd ${remoteDistPath}`,
-          `npm i --production`,
-          `cd ${remoteDistPath}/${cellInfo.cwd}`,
-          'npm i --production',
-        ].join(' && '),
+        '. ~/.nvm/nvm.sh',
+        `nvm install ${packagejson.engines.node}`,
+        `nvm use ${packagejson.engines.node}`,
+        `cd ${remoteDistPath}`,
+        `npm i --production`,
+        `cd ${remoteDistPath}/${cellInfo.cwd}`,
+        'npm i --production',
         !mitosis.storeCmd ? `npx angel cell mitosis ${angel.cmdData.mitosisName} store` : mitosis.storeCmd
-      ].filter(v => v).join(' && ')}'`
+      ].join(' && ')}'`
     ].join(' && ')
     if (process.env.DRY || angel.dry) {
       console.info(deployCmd)
