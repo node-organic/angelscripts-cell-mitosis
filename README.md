@@ -1,10 +1,12 @@
 # angelscripts-cell-mitosis
 
-Angel scripts for deploying organic cells on `vps` infrastructure. Plays nicely with:
+Angel scripts for deploying organic cell on `vps` infrastructure. Plays nicely with:
 
 * [organic-nginx-configurator](https://github.com/node-organic/organic-nginx-configurator)
 * [organic-systemd-configurator](https://github.com/node-organic/organic-systemd-configurator)
 * [organic-flush-legacy-cells](https://github.com/node-organic/organic-flush-legacy-cells)
+
+Designed to work with a cell within monorepo following stem skeleton 2.1.0.
 
 ## How to install
 
@@ -26,17 +28,21 @@ npm install angelscripts-cell-mitosis --save-dev
 
 Start a cell mitosis. This essentially deploys the current working cell to a remote outlined by the mitosis structure in cell's dna:
 
-```javascript
+```
 {
-  name: String,
-  target: {
-    domain: String,
-    ip: String
-  },
-  versionChange: String, // "major", "minor", "patch", "current", "prerelease-<identifier>"
-  mode: String,
-  zygote: Boolean,
-  storeCmd: "npx angel cell mitosis ${mitosisName} store"
+  cwd: '...',
+  build: { ... },
+  mitosis: {
+    name: String,
+    target: {
+      domain: String,
+      ip: String
+    },
+    versionChange: String, // "major", "minor", "patch", "current", "prerelease-<identifier>"
+    mode: String,
+    zygote: Boolean,
+    mergeDNAFrom: String
+  }
 }
 ```
 
@@ -50,9 +56,25 @@ short way is using `$ angel cell mitosis :mitosisName` having versionChange defi
   * using `prerelease-<identifier>` as versionChange indicates to bump a prerelease with provided `identifier`
   
 1. packs current working cell by reading its name from `packagejson.name`
-2. uploads to mitosis' target `mitosis.target.ip` at `/home/node/deployments/cells/{name}-{version}-{mitosis.mode}.json`
-3. writes to `/home/node/deployments/{name}-{version}-{mitosis.mode}.json` having contents:
 
+  Note that having `packagejson.scripts.build` present will flag that the cell can be build via `npm run build` and will engage mitosis using cell's build artifact expected at `/dist` folder. Otherwise packs:
+  
+  * `/dna`
+  * `/cells/{cwd}`
+  * `/cells/node_modules`
+  * `/package.json`
+  
+2. uploads to `mitosis.target.ip` at `/home/node/deployments/cells/{cellName}-{packagejson.version}-{cellMode}/deployment.tar.gz`
+3. unpacks `deployment.tar.gz` into its containing directory
+
+  Note that having `mergeDNAFrom` present indicates a source directory location which will be copied over the unpacked `/dna` folder. This is usually used to provide server stored secrets.
+  
+  For cells which are not build `npm i --production` is performed for the monorepo and the deployed cell.
+  
+4. writes to a delpoymentJSON having contents:
+
+  Located at `/home/node/deployments/{name}-{version}-{mitosis.mode}.json`
+  
   ```javascript
 {
   name: packagejson.name,
@@ -69,19 +91,19 @@ short way is using `$ angel cell mitosis :mitosisName` having versionChange defi
 
 ### angel cell apoptosis :mitosisName
 
-Deletes a mitosis from remote. This essentially deletes `/home/node/deployments/{name}-{version}-{mitosis.mode}.json` on the remote.
+This essentially deletes `/home/node/deployments/{name}-{version}-{mitosis.mode}.json` on the remote.
 
 ### angel cell restart :mitosisName
 
-Restarts all cells by their name by given mitosisName. :warning: this restarts all cell versions.
+Restarts all cells by their name by given `mitosisName`. :warning: this restarts all cell versions.
 
 ### angel cell status :mitosisName
 
-Lists all active cell versions by given mitosisName.
+Lists all active cell versions by given `mitosisName`.
 
 ## Testing
 
-You're more than welcome to PR in this repo.
+You're more than welcome to contribute tests for this repo.
 
 ## Contributing
 
