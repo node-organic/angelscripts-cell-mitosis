@@ -1,6 +1,10 @@
 # angelscripts-cell-mitosis
 
-Angel scripts for deploying organic cells on `vps` infrastructure.
+Angel scripts for deploying organic cells on `vps` infrastructure. Plays nicely with:
+
+* [organic-nginx-configurator](https://github.com/node-organic/organic-nginx-configurator)
+* [organic-systemd-configurator](https://github.com/node-organic/organic-systemd-configurator)
+* [organic-flush-legacy-cells](https://github.com/node-organic/organic-flush-legacy-cells)
 
 ## How to install
 
@@ -14,7 +18,7 @@ npm install angelscripts-cell-mitosis --save-dev
 
 ## VPS requirements
 
-`angelscripts-cell-mitosis` requires `Ubuntu` version 14.04+ or Debian version 7+
+`Ubuntu` version 14.04+ or Debian version 7+ server **with ssh access**
 
 ## Usage
 
@@ -29,16 +33,25 @@ Start a cell mitosis. This essentially deploys the current working cell to a rem
     domain: String,
     ip: String
   },
-  versionChange: String,
+  versionChange: String, // "major", "minor", "patch", "current", "prerelease-<identifier>"
   mode: String,
   zygote: Boolean,
   storeCmd: "npx angel cell mitosis ${mitosisName} store"
 }
 ```
 
+short way is using `$ angel cell mitosis :mitosisName` having versionChange defined in mitosis dna.
+
+0. uses `versionChange` to set `packagejson.version` and git commits/pushes.
+
+  Note you need to have git configured to push to default remote.
+  
+  * using `current` as versionChange indicates to skip version bump
+  * using `prerelease-<identifier>` as versionChange indicates to bump a prerelease with provided `identifier`
+  
 1. packs current working cell by reading its name from `packagejson.name`
 2. uploads to mitosis' target `mitosis.target.ip` at `/home/node/deployments/cells/{name}-{version}-{mitosis.mode}.json`
-3. writes to `/home/node/deployments/{name}-{version}-{mitosis.mode}.json`
+3. writes to `/home/node/deployments/{name}-{version}-{mitosis.mode}.json` having contents:
 
   ```javascript
 {
@@ -46,11 +59,11 @@ Start a cell mitosis. This essentially deploys the current working cell to a rem
   cwd: process.cwd(),
   version: packagejson.version,
   nodeVersion: packagejson.engines.node,
-  endpoint: '127.0.0.1:' + port,
-  port: port,
-  mountpoint: 'cell-mountpoints.{cellName}',
-  domain: mitosis.target.domain,
-  mitosis: mitosis
+  endpoint: String, // computed based on mitosisDNA
+  port: '@cell-ports.{cellName}',
+  mountpoint: '@cell-mountpoints.{cellName}',
+  mitosis: MitosisDNA
+  domain: MitosisDNA.target.domain
 }
   ```
 
@@ -68,15 +81,11 @@ Lists all active cell versions by given mitosisName.
 
 ## Testing
 
-Doesn't have a test section. Why ?
-
-Simulation of vps is really a tough task and for us is wasting of time.
-
-If you project requires 100% test coverage you're more than welcome to PR in this repo.
+You're more than welcome to PR in this repo.
 
 ## Contributing
 
 We :hearts: contribution. Please follow these simple rules: 
 
-- Update the `README.md` with details of changes. This includes new environment variables, useful file locations and parameters.
-- Have fun :fire::dizzy:
+- Keep the `README.md` up-to-date with changes
+- Have fun :fire::rocket::shipit:
