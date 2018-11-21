@@ -10,10 +10,10 @@ module.exports = function (angel) {
     let cellInfo = await loadCellInfo(cellName)
     let mitosis = cellInfo.dna.mitosis[angel.cmdData.mitosisName]
     let cellMode = mitosis.mode
-    let remoteMitosisPath = `~/deployments/${cellName}-${packagejson.version}-${cellMode}.json`
+    let deployentJSONPath = `/home/node/deployments/${cellName}-${packagejson.version}-${cellMode}.json`
     await angel.exec([
       `ssh node@${mitosis.target.ip} '${[
-        `rm ${remoteMitosisPath}`
+        `rm ${deployentJSONPath}`
       ].join(' && ')}'`
     ].join(' && '))
   })
