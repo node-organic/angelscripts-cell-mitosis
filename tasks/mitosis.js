@@ -44,12 +44,12 @@ module.exports = function (angel) {
     }
     let cellMode = mitosis.mode
     let packPath = path.join(os.tmpdir(), `${cellName}-${packagejson.version}-${cellMode}.tar.gz`)
-    let remoteDistPath = `~/deployments/cells/${cellName}-${packagejson.version}-${cellMode}`
+    let remoteDistPath = `/home/node/deployments/cells/${cellName}-${packagejson.version}-${cellMode}`
     await doPromise(angel, `cell pack ${angel.cmdData.mitosisName} ${packPath}`)
     let rootDNA = await loadRootDNA()
     let mitosisJSON = {
       name: cellName,
-      cwd: process.cwd(),
+      cwd: `${remoteDistPath}/${cellInfo.cwd}`,
       version: packagejson.version,
       nodeVersion: packagejson.engines.node,
       endpoint: '127.0.0.1:' + rootDNA['cell-ports'][cellName],
@@ -59,7 +59,7 @@ module.exports = function (angel) {
       mitosis: mitosis
     }
     if (mitosis.zygote) {
-      mitosisJSON.endpoint = process.cwd() + '/dist'
+      mitosisJSON.endpoint = mitosisJSON.cwd + '/dist'
     }
     let mitosisJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}.json`
     let deployCmd = [
@@ -67,7 +67,9 @@ module.exports = function (angel) {
       `ssh node@${mitosis.target.ip} '${[
         `mkdir -p ${remoteDistPath}`,
       ].join(' && ')}'`,
+      `echo 'uploading deployment ${packPath}...'`,
       `scp ${packPath} node@${mitosis.target.ip}:${remoteDistPath}/deployment.tar.gz`,
+      `echo 'unpacking deployment ${remoteDistPath}/deployment.tar.gz...'`,
       `ssh node@${mitosis.target.ip} '${[
         `cd ${remoteDistPath}`,
         'tar -zxf deployment.tar.gz',
@@ -77,14 +79,16 @@ module.exports = function (angel) {
         `cd ${remoteDistPath}`,
         `npm i --production`,
         `cd ${remoteDistPath}/${cellInfo.cwd}`,
-        'npm i --production',
-        `echo \\'${JSON.stringify(mitosisJSON, null, 2)}\\' > ${mitosisJSONPath}`
-      ].join(' && ')}'`
+        'npm i --production'
+      ].join(' && ')}'`,
+      `echo 'registering mitosis ${mitosisJSONPath}...'`,
+      `echo '${JSON.stringify(mitosisJSON, null, 2)}' | ssh node@${mitosis.target.ip} 'cat > ${mitosisJSONPath}'`
     ].join(' && ')
     if (process.env.DRY || angel.dry) {
       console.info(deployCmd)
     } else {
       await angel.exec(deployCmd)
+      console.info('deployment complete!')
     }
   })
 }
