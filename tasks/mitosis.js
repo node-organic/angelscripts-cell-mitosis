@@ -1,4 +1,4 @@
-const findSkeletonRoot = require('../lib/skeleton-root-path')
+const findSkeletonRoot = require('organic-stem-skeleton-find-root')
 const path = require('path')
 const os = require('os')
 const fs = require('fs')

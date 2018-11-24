@@ -95,11 +95,15 @@ This essentially deletes `/home/node/deployments/{name}-{version}-{mitosis.mode}
 
 ### angel cell restart :mitosisName
 
-Restarts all cells by their name by given `mitosisName`. :warning: this restarts all cell versions.
+Restarts **all cells** by their name by given `mitosisName`. :warning: this restarts all cell versions.
 
 ### angel cell status :mitosisName
 
-Lists all active cell versions by given `mitosisName`.
+Lists **all active cell versions** by given `mitosisName`.
+
+### angel cell stop :mitosisName
+
+Stops **all active cell versions** by given `mitosisName`.
 
 ## Testing
 
