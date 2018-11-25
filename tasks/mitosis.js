@@ -1,4 +1,5 @@
 const findSkeletonRoot = require('organic-stem-skeleton-find-root')
+const deploymentJSONPath = require('../lib/deployment-json-path')
 const path = require('path')
 const os = require('os')
 const fs = require('fs')
@@ -61,7 +62,8 @@ module.exports = function (angel) {
     if (mitosis.zygote) {
       deploymentJSON.endpoint = deploymentJSON.cwd + '/dist'
     }
-    let deploymentJSONPath = `/home/node/deployments/${packagejson.name}-${packagejson.version}-${mitosis.mode}.json`
+    let deploymentEnabledPath = deploymentJSONPath.enabled(packagejson.name, packagejson.version, mitosis.mode)
+    let deploymentRunningPath = deploymentJSONPath.running(packagejson.name, packagejson.version, mitosis.mode)
     let deployCmd = [
       `cd ${full_repo_path}`,
       `ssh node@${mitosis.target.ip} '${[
@@ -84,9 +86,13 @@ module.exports = function (angel) {
           'npm i --production'
         ].join(' && ') : ''
       ].filter(v => v).join(' && ')}'`,
-      `echo 'registering deployment ${deploymentJSONPath}...'`,
-      `echo '${JSON.stringify(deploymentJSON, null, 2)}' | ssh node@${mitosis.target.ip} 'cat > ${deploymentJSONPath}'`
-    ].join(' && ')
+      `echo 'registering deployment ${deploymentEnabledPath}...'`,
+      `echo '${JSON.stringify(deploymentJSON, null, 2)}' | ssh node@${mitosis.target.ip} 'cat > ${deploymentEnabledPath}'`,
+      mitosis.zygote ? [
+        `echo 'mark as running deployment ${deploymentRunningPath}...'`,
+        `echo '${JSON.stringify(deploymentJSON, null, 2)}' | ssh node@${mitosis.target.ip} 'cat > ${deploymentRunningPath}'`,
+      ].join(' && ') : '',
+    ].filter(v => v).join(' && ')
     if (process.env.DRY || angel.dry) {
       console.info(deployCmd)
     } else {

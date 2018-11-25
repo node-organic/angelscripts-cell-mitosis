@@ -1,4 +1,5 @@
 const findSkeletonRoot = require('organic-stem-skeleton-find-root')
+const deploymentJSONPath = require('../lib/deployment-json-path')
 const path = require('path')
 
 module.exports = function (angel) {
@@ -10,10 +11,11 @@ module.exports = function (angel) {
     let cellInfo = await loadCellInfo(cellName)
     let mitosis = cellInfo.dna.mitosis[angel.cmdData.mitosisName]
     let cellMode = mitosis.mode
-    let deployentJSONPath = `/home/node/deployments/${cellName}-${packagejson.version}-${cellMode}.json`
     await angel.exec([
       `ssh node@${mitosis.target.ip} '${[
-        `rm ${deployentJSONPath}`
+        `rm ${deploymentJSONPath.enabled(cellName, packagejson.version, cellMode)} || true`,
+        `rm ${deploymentJSONPath.running(cellName, packagejson.version, cellMode)} || true`,
+        `echo 'apoptosis complete'`
       ].join(' && ')}'`
     ].join(' && '))
   })

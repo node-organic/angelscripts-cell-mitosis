@@ -1,26 +1,29 @@
 # angelscripts-cell-mitosis
 
-Angel scripts for deploying organic cell on `vps` infrastructure. Plays nicely with:
-
-* [organic-nginx-configurator](https://github.com/node-organic/organic-nginx-configurator)
-* [organic-systemd-configurator](https://github.com/node-organic/organic-systemd-configurator)
-* [organic-flush-legacy-cells](https://github.com/node-organic/organic-flush-legacy-cells)
-
+Angel scripts for deploying organic cell on `vps` infrastructure. 
 Designed to work with a cell within monorepo following stem skeleton 2.1.0.
 
 ## How to install
 
-The minimal version of nodejs is: `Nodejs version 4+`
+The minimal version of nodejs is: `Nodejs version 8+`
 
 Open your terminal and run:
 
 ```bash
+cd /path/to/cell
 npm install angelscripts-cell-mitosis --save-dev
 ```
 
 ## VPS requirements
 
 `Ubuntu` version 14.04+ or Debian version 7+ server **with ssh access**
+
+## localhost requirements
+
+* `ssh`
+* `scp`
+* `git`
+* `tar`
 
 ## Usage
 
@@ -71,9 +74,9 @@ short way is using `$ angel cell mitosis :mitosisName` having versionChange defi
   
   For cells which are not build `npm i --production` is performed for the monorepo and the deployed cell.
   
-4. writes to a delpoymentJSON having contents:
+4. writes delpoymentJSON having contents:
 
-  Located at `/home/node/deployments/{name}-{version}-{mitosis.mode}.json`
+  Located at `/home/node/deployments/enabled/{name}-{version}-{mitosis.mode}.json`
   
   ```javascript
 {
@@ -88,22 +91,22 @@ short way is using `$ angel cell mitosis :mitosisName` having versionChange defi
   domain: MitosisDNA.target.domain
 }
   ```
+  
+  Optionally for zygote mitosis writes the same deploymentJSON to `/home/node/deployments/running/{name}-{version}-{mitosis.mode}.json`
 
 ### angel cell apoptosis :mitosisName
 
-This essentially deletes `/home/node/deployments/{name}-{version}-{mitosis.mode}.json` on the remote.
+This essentially deletes on the remote:
 
-### angel cell restart :mitosisName
+* `/home/node/deployments/enabled/{name}-{version}-{mitosis.mode}.json` 
+* `/home/node/deployments/running/{name}-{version}-{mitosis.mode}.json` 
 
-Restarts **all cells** by their name by given `mitosisName`. :warning: this restarts all cell versions.
+## Related
 
-### angel cell status :mitosisName
+* [organic-nginx-configurator](https://github.com/node-organic/organic-nginx-configurator)
+* [organic-systemd-configurator](https://github.com/node-organic/organic-systemd-configurator)
+* [organic-flush-legacy-cells](https://github.com/node-organic/organic-flush-legacy-cells)
 
-Lists **all active cell versions** by given `mitosisName`.
-
-### angel cell stop :mitosisName
-
-Stops **all active cell versions** by given `mitosisName`.
 
 ## Testing
 
