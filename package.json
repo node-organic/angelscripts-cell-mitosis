@@ -1,6 +1,6 @@
 {
   "name": "angelscripts-cell-mitosis",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Angel scripts for deploying organic cells on `vps` infrastructure.",
   "main": "index.js",
   "scripts": {
